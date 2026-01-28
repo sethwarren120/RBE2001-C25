@@ -9,6 +9,17 @@ void Robot::UpdatePose(const Twist& twist)
     /**
      * TODO: Add your FK algorithm to update currPose here.
      */
+    float time = 0.020; // 20 ms update time
+
+    float newTheta = currPose.theta + twist.omega * time;
+    float avgTheta = (currPose.theta + newTheta) / 2;
+
+    float newx = currPose.x + time * twist.u * cos(avgTheta);
+    float newy = currPose.y + time * twist.u * sin(avgTheta);
+
+    currPose.x = newx;
+    currPose.y = newy;
+    currPose.theta = newTheta;
 
 #ifdef __NAV_DEBUG__
     TeleplotPrint("x", currPose.x);
@@ -71,4 +82,5 @@ void Robot::HandleDestination(void)
     /**
      * TODO: Stop and change state. Turn off LED.
      */
+    digitalWrite(13, LOW);
 }

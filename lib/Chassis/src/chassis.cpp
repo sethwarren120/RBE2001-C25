@@ -147,6 +147,23 @@ Twist Chassis::CalcOdomFromWheelMotion(void)
      * In that case, you should return a Pose instead of a Twist.
      */
 
+      float leftSpeed = leftMotor.speed;
+     float rightSpeed = rightMotor.speed;
+
+     /* 
+     12.0 counts per revolution
+     120.0 is the gearbox
+     3.5 is the wheel radius
+     */
+     float conversion = 1000.0 / (float)CONTROL_LOOP_PERIOD_MS / 12.0 / 120.0 * 2 * PI * 3.5;
+
+     leftSpeed = leftSpeed * conversion; // cm/s
+     rightSpeed = rightSpeed * conversion;
+
+     velocity.u = (rightSpeed + leftSpeed) / 2;
+     velocity.omega = (rightSpeed - leftSpeed) / (ROBOT_RADIUS * 2);
+
+
 #ifdef __NAV_DEBUG__
     TeleplotPrint("u", velocity.u);
     TeleplotPrint("omega", velocity.omega);
