@@ -33,6 +33,17 @@ public:
     void InitializeRobot(void);
     void RobotLoop(void);
 
+    void TeleplotPrintXY(const char* topic, float x, float y)
+    {
+        Serial.print("\n>");
+        Serial.print(topic);
+        Serial.print(':');
+        Serial.print(x, 5);
+        Serial.print(':');
+        Serial.print(y, 5);
+        Serial.println("|xy");
+    }
+
 protected:
     /* State changes */    
     void EnterIdleState(void);
