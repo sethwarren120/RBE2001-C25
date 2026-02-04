@@ -165,8 +165,8 @@ Twist Chassis::CalcOdomFromWheelMotion(void)
 
 
 #ifdef __NAV_DEBUG__
-    TeleplotPrint("u", velocity.u);
-    TeleplotPrint("omega", velocity.omega);
+    // TeleplotPrint("u", velocity.u);
+    // TeleplotPrint("omega", velocity.omega);
 #endif
 
     return velocity;

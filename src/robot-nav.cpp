@@ -22,9 +22,10 @@ void Robot::UpdatePose(const Twist& twist)
     currPose.theta = newTheta;
 
 #ifdef __NAV_DEBUG__
-    TeleplotPrint("x", currPose.x);
-    TeleplotPrint("y", currPose.y);
+    // TeleplotPrint("x", currPose.x);
+    // TeleplotPrint("y", currPose.y);
     TeleplotPrint("theta", currPose.theta);
+    TeleplotPrintXY("pose", currPose.x, currPose.y);
 #endif
 
 }
@@ -46,15 +47,19 @@ void Robot::SetDestination(const Pose& dest)
     robotState = ROBOT_DRIVE_TO_POINT;
 }
 
-float drivekP = 1;
+float drivekP = 10;
 float turnkP = 1;
 
 void Robot::DriveToPoint(void)
 {
     if(robotState == ROBOT_DRIVE_TO_POINT)
     {
-        float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 360.0) - 180;
+        float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2 * PI);
+        errHead -= (errHead > PI) ? 2 * PI : 0;
+        errHead = 0;
         float errDist = sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) * cos(errHead);
+
+        TeleplotPrint("errDist", errDist);
 
         float effortLeft = errDist * drivekP - errHead * turnkP;
         float effortRight = errDist * drivekP + errHead * turnkP;

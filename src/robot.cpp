@@ -1,4 +1,9 @@
 #include "robot.h"
+#include <Romi32U4Buttons.h>
+
+Romi32U4ButtonC buttonC;
+
+int taskTimer = 0;
 
 void Robot::InitializeRobot(void)
 {
@@ -33,7 +38,6 @@ void Robot::RobotLoop(void)
     {
         // We do FK regardless of state
         UpdatePose(velocity);
-        chassis.SetMotorEfforts(220,-220);
         
         /**
          * Here, we break with tradition and only call these functions if we're in the 
@@ -42,6 +46,16 @@ void Robot::RobotLoop(void)
          * 
          * While we're at it, we'll toss DriveToPoint() in, as well.
          */ 
+        if (robotState == ROBOT_TASK_WAIT) {
+            taskTimer--;
+            if (taskTimer <= 0) {
+                SetDestination(Pose(60,0,0));
+            }
+        }
+        else if (buttonC.isPressed()) {
+            taskTimer = 30;
+            robotState = ROBOT_TASK_WAIT;
+        }
         if(robotState == ROBOT_DRIVE_TO_POINT)
         {
             DriveToPoint();
