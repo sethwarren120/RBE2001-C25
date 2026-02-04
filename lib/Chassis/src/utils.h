@@ -3,6 +3,7 @@
 
 void TeleplotPrint(const char* var, float value);
 
+
 /**
  * Pose includes information about the 2D pose of a robot: x, y, and heading.
  */

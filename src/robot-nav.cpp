@@ -30,6 +30,19 @@ void Robot::UpdatePose(const Twist& twist)
 
 }
 
+float clampReal(float value, float min, float max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
+float invClamp(float value, float min, float max) {
+    if (value > min && value < max) {
+        return (value - min > max - value) ? max : min;
+    }
+    return value;
+}
+
 /**
  * Sets a destination in the lab frame.
  */
@@ -48,7 +61,7 @@ void Robot::SetDestination(const Pose& dest)
 }
 
 float drivekP = 10;
-float turnkP = 1;
+float turnkP = 3;
 
 void Robot::DriveToPoint(void)
 {
@@ -56,16 +69,19 @@ void Robot::DriveToPoint(void)
     {
         float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2 * PI);
         errHead -= (errHead > PI) ? 2 * PI : 0;
-        errHead = 0;
+        // errHead = 0;
         float errDist = sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) * cos(errHead);
 
         TeleplotPrint("errDist", errDist);
 
-        float effortLeft = errDist * drivekP - errHead * turnkP;
-        float effortRight = errDist * drivekP + errHead * turnkP;
+        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -30, 30), -10, 10) - errHead * turnkP, -30, 30);
+        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -30, 30), -10, 10) + errHead * turnkP, -30, 30);
+
         /**
          * TODO: Add your IK algorithm here. 
          */
+
+         TeleplotPrint("effortLeft", effortLeft);
 
 #ifdef __NAV_DEBUG__
         // Print useful stuff here.
