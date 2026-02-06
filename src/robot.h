@@ -53,6 +53,8 @@ protected:
     // /* Navigation methods.*/
     void UpdatePose(const Twist& u);
     void SetDestination(const Pose& destination);
+    void Spin(void);
+    bool CheckSpin(void);
     void DriveToPoint(void);
     bool CheckReachedDestination(void);
     void HandleDestination(void);

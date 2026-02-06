@@ -6,9 +6,6 @@
 
 void Robot::UpdatePose(const Twist& twist)
 {
-    /**
-     * TODO: Add your FK algorithm to update currPose here.
-     */
     float time = 0.020; // 20 ms update time
 
     float newTheta = currPose.theta + twist.omega * time;
@@ -61,27 +58,37 @@ void Robot::SetDestination(const Pose& dest)
 }
 
 float drivekP = 10;
-float turnkP = 3;
+float turnkP = 10;
+
+void Robot::Spin(void) {
+    if(robotState == ROBOT_DRIVE_TO_POINT) {
+        float error = destPose.theta - currPose.theta;
+        float effortLeft = invClamp(-error * turnkP, -25, 25);
+        float effortRight = invClamp(error * turnkP, -25, 25);
+        chassis.SetMotorEfforts(effortLeft, effortRight);
+    }
+}
+
+bool Robot::CheckSpin(void) {
+    return fabs(destPose.theta - currPose.theta) < 0.05; // error tolerance of 0.2 radians
+}
 
 void Robot::DriveToPoint(void)
 {
     if(robotState == ROBOT_DRIVE_TO_POINT)
     {
-        float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2 * PI);
+        float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2*PI);
         errHead -= (errHead > PI) ? 2 * PI : 0;
-        // errHead = 0;
+        
         float errDist = sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) * cos(errHead);
 
         TeleplotPrint("errDist", errDist);
 
-        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -30, 30), -10, 10) - errHead * turnkP, -30, 30);
-        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -30, 30), -10, 10) + errHead * turnkP, -30, 30);
-
-        /**
-         * TODO: Add your IK algorithm here. 
-         */
+        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -30, 30), -10, 10) - invClamp(errHead * turnkP, -20, 20), -50, 50);
+        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -30, 30), -10, 10) + invClamp(errHead * turnkP, -20, 20), -50, 50);
 
          TeleplotPrint("effortLeft", effortLeft);
+         TeleplotPrint("error head", errHead);
 
 #ifdef __NAV_DEBUG__
         // Print useful stuff here.
@@ -93,7 +100,7 @@ void Robot::DriveToPoint(void)
 
 bool Robot::CheckReachedDestination(void)
 {
-    return sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) < 2.0;
+    return sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) < 2.0; // error tolerance of 2 cm
 }
 
 void Robot::HandleDestination(void)
