@@ -19,8 +19,8 @@ void Robot::UpdatePose(const Twist& twist)
     currPose.theta = newTheta;
 
 #ifdef __NAV_DEBUG__
-    // TeleplotPrint("x", currPose.x);
-    // TeleplotPrint("y", currPose.y);
+    TeleplotPrint("x", currPose.x);
+    TeleplotPrint("y", currPose.y);
     TeleplotPrint("theta", currPose.theta);
     TeleplotPrintXY("pose", currPose.x, currPose.y);
 #endif
@@ -84,8 +84,8 @@ void Robot::DriveToPoint(void)
 
         TeleplotPrint("errDist", errDist);
 
-        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -30, 30), -10, 10) - invClamp(errHead * turnkP, -20, 20), -50, 50);
-        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -30, 30), -10, 10) + invClamp(errHead * turnkP, -20, 20), -50, 50);
+        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -60, 60), -20, 20) - invClamp(errHead * turnkP, -20, 20), -60, 60);
+        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -60, 60), -20, 20) + invClamp(errHead * turnkP, -20, 20), -60, 60);
 
          TeleplotPrint("effortLeft", effortLeft);
          TeleplotPrint("error head", errHead);
@@ -107,8 +107,5 @@ void Robot::HandleDestination(void)
 {
     chassis.Stop();
     digitalWrite(LED_BUILTIN, LOW);
-    /**
-     * TODO: Stop and change state. Turn off LED.
-     */
     digitalWrite(13, LOW);
 }
