@@ -28,6 +28,7 @@ void Robot::EnterIdleState(void)
 
 
 float poses[][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+int poseIndex = 0;
 
 /**
  * The main loop for your robot. Process both synchronous events (motor control),
@@ -35,6 +36,7 @@ float poses[][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
 */
 
 Pose pose;
+bool spinned = false;
 
 void Robot::RobotLoop(void) 
 {
@@ -62,27 +64,37 @@ void Robot::RobotLoop(void)
             else if(buttonA.isPressed()) {
                 taskTimer = 30;
                 robotState = ROBOT_TASK_WAIT;
-                pose = Pose(60, 0, 0);
-            }
-            else if(buttonB.isPressed()) {
-                taskTimer = 30;
-                robotState = ROBOT_TASK_WAIT;
-                pose = Pose(0, 0, -2 * PI);
-            }
-            else if (buttonC.isPressed()) {
-                taskTimer = 30;
-                robotState = ROBOT_TASK_WAIT;
-                pose = Pose(0, 0, 2 * PI);
+                pose = Pose(poses[poseIndex][0], poses[poseIndex][1], 0);
             }
             if(robotState == ROBOT_DRIVE_TO_POINT) {
 
-                Spin();
-                if(CheckSpin()) {
-                    HandleDestination();
+                // spin to face the point to minimize turning while driving
+                if(!spinned) {
+                    float xErr = destPose.x - currPose.x;
+                    float yErr = destPose.y - currPose.y;
+                    float errHead = atan2(yErr, xErr) - currPose.theta;
+                    errHead = fmod(errHead, 2*PI);
+                    errHead -= (errHead > PI) ? 2 * PI : 0;
+
+                    Pose tempPose = Pose(0, 0, errHead);
+                    SetDestination(tempPose);
+                    Spin();
+                    if(CheckSpin()) {
+                        HandleDestination();
+                        spinned = true;
+                    }
                 }
-                // SetDestination(pose);
-                // DriveToPoint();
-                // if(CheckReachedDestination()) HandleDestination();
+                // drive to point with hopefully minimal turning
+                else {
+                    SetDestination(pose);
+                    DriveToPoint();
+                    if(CheckReachedDestination()) {
+                        HandleDestination();
+                        // if at destination, update to the next pose in the list
+                        poseIndex++;
+                        pose = Pose(poses[poseIndex][0], poses[poseIndex][1], 0);
+                    }
+                }
             }
         }
     }
