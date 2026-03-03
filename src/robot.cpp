@@ -25,17 +25,18 @@ Pose finish = Pose(20, 0, 0);
 void Robot::RobotLoop(void) 
 {
     if (buttonC.isPressed()) {
+
         delay(3000);
 
         extender.out();
 
         gripper.grip();
 
-        elevator.setHeight(1);
+        elevator.setHeight(Elevator::ElevatorPositions::CHASSISCLEARANCE);
 
         extender.in();
 
-        elevator.setHeight(2);
+        elevator.setHeight(Elevator::ElevatorPositions::LOWERSHELF);
 
         extender.out();
 
@@ -43,7 +44,7 @@ void Robot::RobotLoop(void)
 
         extender.in();
 
-        elevator.setHeight(3);
+        elevator.setHeight(Elevator::ElevatorPositions::UPPERSHELF);
 
         extender.out();
 
@@ -51,7 +52,7 @@ void Robot::RobotLoop(void)
 
         extender.in();
 
-        elevator.setHeight(4);
+        elevator.setHeight(Elevator::ElevatorPositions::TOP);
 
         extender.out();
 
@@ -59,7 +60,7 @@ void Robot::RobotLoop(void)
 
         extender.in();
 
-        elevator.setHeight(1);
+        elevator.setHeight(Elevator::ElevatorPositions::CHASSISCLEARANCE);
 
         DriveToPoint(intermediate);
 

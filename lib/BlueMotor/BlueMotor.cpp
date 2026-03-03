@@ -6,7 +6,8 @@ long countLast = 0;
 unsigned time = 0;
   
 float ks = 0;
-float kp = 0;
+float kg = 0;
+float kp = 5;
 float kd = 0; 
 long maxError = 1;
 
@@ -65,6 +66,15 @@ void BlueMotor::isr()
     prevEncA = encA;
 }
 
+float countsToCm(long counts) {
+    // 270 counts per revolution
+    float rotations = counts / 270.0f;
+    // Gear Reduction
+    rotations *= 18.0f / 34.0f;
+    // Rotations * gear circumference (2 * PI * radius)
+    return rotations * 2.0 * PI * 1.0;
+}
+
 void BlueMotor::setEffort(int effort)
 {
     if (effort < 0)
@@ -89,17 +99,25 @@ void BlueMotor::setEffort(int effort, bool clockwise)
         digitalWrite(AIN1, LOW);
         digitalWrite(AIN2, HIGH);
     }
-    OCR1C = constrain(effort, 0, 400);
+    // True range is 0 to 400, set to 200 for safety
+    // CAN CHANGE THIS IF NEEDED
+    OCR1C = constrain(effort, 0, 200);
 }
 
-void BlueMotor::moveTo(long target)  
+void BlueMotor::moveTo(float target)  
 {                     
-    while(abs(target - getPosition()) > maxError) {
-        long position = getPosition();
-        long error = target - position;
-        long velocity = position - countLast;
+    while(abs(target - countsToCm(getPosition())) > maxError) {
+        float position = countsToCm(getPosition());
+        float error = target - position;
+        float velocity = position - countLast * 50.0f; // Cm/s
 
-        setEffort(ks + kp * error + kd * velocity);
+        float direction = error / abs(error);
+
+        // Combination of PID and feedforward control
+        // Feedforward kg and ks are meant to remove the effects of gravity and
+        // friction from the pd controller
+
+        setEffort(kg + ks * direction + kp * error + kd * velocity);
 
         delay(20);
     }

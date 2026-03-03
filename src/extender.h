@@ -4,10 +4,10 @@ class Extender
 {
 private:
     Servo servo;
-    int pin;
+    int pin = 11;
 
-    int positionOut = 50;
-    int positionIn = 10;
+    int positionOut = 180;
+    int positionIn = 0;
 
 public:
     void setup();

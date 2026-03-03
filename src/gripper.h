@@ -4,10 +4,10 @@ class Gripper
 {
 private:
     Servo servo;
-    int pin;
+    int pin = 4;
 
-    int positionGrip;
-    int positionRelease;
+    int positionGrip = 90;
+    int positionRelease = 0;
 
 public:
     void setup();

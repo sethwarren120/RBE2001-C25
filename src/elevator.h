@@ -5,16 +5,26 @@ class Elevator
 private:
     BlueMotor motor;
 
-    int groundHeight = 0;
-    int clearHeight = 30;
-    int lowerHeight = 60;
-    int upperHeight = 90;
-    int topHeight = 120;
+    float groundHeight = 0.0f;
+    float clearHeight = 9.0f;
+    float lowerHeight = 17.3f;
+    float upperHeight = 21.6;
+    float topHeight = 25.9;
 
-    int positions[5] = { groundHeight, clearHeight, lowerHeight, upperHeight, topHeight };
+    float positions[5] = { groundHeight, clearHeight, lowerHeight, upperHeight, topHeight };
+
+    // Base height 2.5
 
 public:
     void setup();
 
     void setHeight(int pos);
+
+    enum ElevatorPositions {
+        GROUND,
+        CHASSISCLEARANCE,
+        LOWERSHELF,
+        UPPERSHELF,
+        TOP
+    };
 };
