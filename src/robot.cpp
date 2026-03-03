@@ -1,15 +1,70 @@
 #include "robot.h"
-#include <servo32u4.h>
+#include"elevator.h"
+#include"extender.h"
+#include"gripper.h"
 #include <Romi32U4Buttons.h>
 
 Romi32U4ButtonC buttonC;
 
-int taskTimer = 0;
 
 void Robot::InitializeRobot(void)
 {
     chassis.InititalizeChassis();
+    elevator.setup();
+    extender.setup();
+    gripper.setup();
 
+    extender.out();
+    gripper.release();
+}
+
+Pose intermediate = Pose(10, -10, 0);
+
+Pose finish = Pose(20, 0, 0);
+
+void Robot::RobotLoop(void) 
+{
+    if (buttonC.isPressed()) {
+        delay(3000);
+
+        extender.out();
+
+        gripper.grip();
+
+        elevator.setHeight(1);
+
+        extender.in();
+
+        elevator.setHeight(2);
+
+        extender.out();
+
+        gripper.release();
+
+        extender.in();
+
+        elevator.setHeight(3);
+
+        extender.out();
+
+        gripper.grip();
+
+        extender.in();
+
+        elevator.setHeight(4);
+
+        extender.out();
+
+        gripper.release();
+
+        extender.in();
+
+        elevator.setHeight(1);
+
+        DriveToPoint(intermediate);
+
+        DriveToPoint(finish);
+    }
 }
 
 void Robot::EnterIdleState(void)
@@ -19,59 +74,3 @@ void Robot::EnterIdleState(void)
     Serial.println("-> IDLE");
     robotState = ROBOT_IDLE;
 }
-
-void Robot::RobotLoop(void) 
-{
-        Twist velocity;
-        if(chassis.ChassisLoop(velocity)) {
-            UpdatePose(velocity);
-                
-            if (robotState == ROBOT_TASK_WAIT) {
-                taskTimer--;
-                if (taskTimer <= 0) {
-                    SetDestination(pose);
-                }
-            }
-            else if(buttonA.isPressed()) {
-                taskTimer = 30;
-                robotState = ROBOT_TASK_WAIT;
-                pose = Pose(poses[poseIndex][0], poses[poseIndex][1], 0);
-            }
-            if(robotState == ROBOT_DRIVE_TO_POINT) {
-
-                // spin to face the point to minimize turning while driving
-                if(!spinned) {
-                    float xErr = destPose.x - currPose.x;
-                    float yErr = destPose.y - currPose.y;
-                    float errHead = atan2(yErr, xErr) - currPose.theta;
-                    errHead = fmod(errHead, 2*PI);
-                    errHead -= (errHead > PI) ? 2 * PI : 0;
-
-                    Pose tempPose = Pose(0, 0, errHead);
-                    SetDestination(tempPose);
-                    Spin();
-                    if(CheckSpin()) {
-                        HandleDestination();
-                        spinned = true;
-                    }
-                }
-                // drive to point with hopefully minimal turning
-                else {
-                    SetDestination(pose);
-                    DriveToPoint();
-                    if(CheckReachedDestination()) {
-                        HandleDestination();
-                        // if at destination, update to the next pose in the list
-
-                        poseIndex++;
-                        pose = Pose(poses[poseIndex][0], poses[poseIndex][1], 0);
-
-                        if (poseIndex == sizeof(poses) / sizeof(poses[0])) {
-                            EnterIdleState();
-                        }
-                    }
-                }
-            }
-        }
-    }
-

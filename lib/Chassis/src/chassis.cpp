@@ -1,8 +1,9 @@
 #include "chassis.h"
 #include "Romi32U4MotorTemplate.h"
 
-Romi32U4EncodedMotor<LEFT_XOR, LEFT_B, PWM_L, DIR_L, OCR_L> leftMotor("L");
-Romi32U4EncodedMotor<RIGHT_XOR, RIGHT_B, PWM_R, DIR_R, OCR_R> rightMotor("R");
+// LEFT AND RIGHT MOTOR HAVE BEEN REVERSED
+Romi32U4EncodedMotor<LEFT_XOR, LEFT_B, PWM_L, DIR_L, OCR_L> rightMotor("L");
+Romi32U4EncodedMotor<RIGHT_XOR, RIGHT_B, PWM_R, DIR_R, OCR_R> leftMotor("R");
 
 /**
  * Because it's declared static, we initialize Chassis::loopFlag here.

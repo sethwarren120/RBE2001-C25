@@ -4,6 +4,57 @@
 
 #include "robot.h"
 
+
+
+/**
+ * Sets a destination in the lab frame.
+ */
+
+float drivekP = 15;
+float turnkP = 25;
+
+
+void Robot::DriveToPoint(const Pose& dest)
+{
+    while(!CheckReachedDestination())
+    {
+        float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2 * PI);
+
+        #ifdef __NAV_DEBUG__
+        TeleplotPrint("unboundErrHead", errHead);
+        #endif
+
+        errHead -= (errHead > PI) ? 2 * PI : 0;
+        errHead += (errHead < -PI) ? 2 * PI : 0;
+        // errHead = 0;
+        float errDist = sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2));
+
+        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -50, 50), -5, 5) - errHead * turnkP, -70, 70);
+        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -50, 50), -5, 5) + errHead * turnkP, -70, 70);
+
+
+        #ifdef __NAV_DEBUG__
+        TeleplotPrint("errHead", errHead);
+        TeleplotPrint("errDist", errDist);
+        TeleplotPrint("effortLeft", effortLeft);
+        #endif
+
+        chassis.SetMotorEfforts(effortLeft, effortRight);
+
+        delay(20);
+    }
+
+    chassis.Stop();
+}
+
+bool Robot::CheckReachedDestination(void)
+{
+    Twist velocity;
+    chassis.ChassisLoop(velocity);
+    UpdatePose(velocity);
+    return sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) < 2.0; // error tolerance of 2 cm
+}
+
 void Robot::UpdatePose(const Twist& twist)
 {
     float time = 0.020; // 20 ms update time
@@ -40,78 +91,7 @@ float invClamp(float value, float min, float max) {
     return value;
 }
 
-/**
- * Sets a destination in the lab frame.
- */
-void Robot::SetDestination(const Pose& dest)
-{
-    digitalWrite(LED_BUILTIN, HIGH);
-
-    Serial.print("Setting dest to: ");
-    Serial.print(dest.x);
-    Serial.print(", ");
-    Serial.print(dest.y);
-    Serial.print('\n');
-
-    destPose = dest;
-    robotState = ROBOT_DRIVE_TO_POINT;
-}
-
-float drivekP = 15;
-float turnkP = 25;
-
-void Robot::Spin(void) {
-    if(robotState == ROBOT_DRIVE_TO_POINT) {
-        float error = destPose.theta - currPose.theta;
-        float effortLeft = invClamp(-error * turnkP, -25, 25);
-        float effortRight = invClamp(error * turnkP, -25, 25);
-        chassis.SetMotorEfforts(effortLeft, effortRight);
-    }
-}
-
-bool Robot::CheckSpin(void) {
-    return fabs(destPose.theta - currPose.theta) < 0.05; // error tolerance of 0.2 radians
-}
-
-
-void Robot::DriveToPoint(void)
-{
-    if(robotState == ROBOT_DRIVE_TO_POINT)
-    {
-        float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2 * PI);
-
-#ifdef __NAV_DEBUG__
-        TeleplotPrint("unboundErrHead", errHead);
-#endif
-
-        errHead -= (errHead > PI) ? 2 * PI : 0;
-        errHead += (errHead < -PI) ? 2 * PI : 0;
-        // errHead = 0;
-        float errDist = sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2));
-
-        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -50, 50), -5, 5) - errHead * turnkP, -70, 70);
-        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -50, 50), -5, 5) + errHead * turnkP, -70, 70);
-
-
-#ifdef __NAV_DEBUG__
-        TeleplotPrint("errHead", errHead);
-        TeleplotPrint("errDist", errDist);
-        TeleplotPrint("effortLeft", effortLeft);
-#endif
-
-        chassis.SetMotorEfforts(effortLeft, effortRight);
-    }
-}
-
-
-bool Robot::CheckReachedDestination(void)
-{
-    return sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) < 2.0; // error tolerance of 2 cm
-}
-
 void Robot::HandleDestination(void)
 {
-    chassis.Stop();
-    digitalWrite(LED_BUILTIN, LOW);
-    digitalWrite(13, LOW);
+    EnterIdleState();
 }

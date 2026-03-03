@@ -63,7 +63,7 @@ protected:
     int16_t CalcEncoderDelta(void)
     {
         cli();
-        int16_t currCount = encCount;
+        int16_t currCount = -encCount;
         sei();
 
         int16_t speed = currCount - prevCount;
@@ -79,7 +79,7 @@ protected:
     int16_t GetEncoderTotal(void)
     {
         cli();
-        int16_t currCount = encCount;
+        int16_t currCount = -encCount;
         sei();
 
         return currCount;
@@ -150,10 +150,13 @@ protected:
     {
         bool reverse = 0;
 
-        if (effort < 0)
+        if (effort > 0)
         {
-            effort = -effort; // Make speed a positive quantity.
             reverse = 1;      // Reverse the direction.
+        }
+        else 
+        {
+            effort = -effort;
         }
         if (effort > maxEffort)
         {

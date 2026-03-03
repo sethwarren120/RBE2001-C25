@@ -16,6 +16,7 @@ protected:
         ROBOT_GRAB,
         ROBOT_RELEASE,
         ROBOT_LOWER,
+        ROBOT_TURN,
         ROBOT_DRIVE_TO_POINT,
         ROBOT_TASK_WAIT,
         ROBOT_TASK
@@ -24,6 +25,10 @@ protected:
 
     /* Define the chassis*/
     Chassis chassis;
+
+    Elevator elevator;
+    Extender extender;
+    Gripper gripper;
 
     // For managing key presses
     String keyString;
@@ -56,10 +61,7 @@ protected:
 
     // /* Navigation methods.*/
     void UpdatePose(const Twist& u);
-    void SetDestination(const Pose& destination);
-    void Spin(void);
-    bool CheckSpin(void);
-    void DriveToPoint(void);
+    void DriveToPoint(const Pose& dest);
     bool CheckReachedDestination(void);
     void HandleDestination(void);
 };

@@ -4,9 +4,11 @@
 volatile long count = 0;
 long countLast = 0;
 unsigned time = 0;
-
-long setpoint = 0;
-bool controlLoop = false;
+  
+float ks = 0;
+float kp = 0;
+float kd = 0; 
+long maxError = 1;
 
 bool prevEncA = false;
 
@@ -91,22 +93,16 @@ void BlueMotor::setEffort(int effort, bool clockwise)
 }
 
 void BlueMotor::moveTo(long target)  
-{                              
-    setpoint = target;
-    controlLoop = true;
-}
+{                     
+    while(abs(target - getPosition()) > maxError) {
+        long position = getPosition();
+        long error = target - position;
+        long velocity = position - countLast;
 
-void BlueMotor::loop() 
-{
-    if (!controlLoop) return;
-     
-    float ks = 0;
-    float kp = 0;
-    float kd = 0; 
-    
-    long position = getPosition();
-    long error = setpoint - position;
-    long velocity = position - countLast;
+        setEffort(ks + kp * error + kd * velocity);
 
-    setEffort(ks + kp * error + kd * velocity);
+        delay(20);
+    }
+
+    setEffort(0);
 }
