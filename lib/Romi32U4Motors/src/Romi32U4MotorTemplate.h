@@ -108,7 +108,7 @@ protected:
 
         noInterrupts(); //disable interrupts while we set Timer1 registers
 
-        TCCR1A = 0xA2; //0b10100010; //Fast PWM + enable A and B; change to 0xAA to enable C on pin 11
+        TCCR1A = 0xAA; //0b10100010; //Fast PWM + enable A and B; change to 0xAA to enable C on pin 11
         TCCR1B = 0x19; //0b00011001; //Fast PWM
         ICR1 = 420;    //runs at 38kHz; lowers speed for given effort by 5% from Pololu version
 
@@ -150,13 +150,10 @@ protected:
     {
         bool reverse = 0;
 
-        if (effort > 0)
-        {
-            reverse = 1;      // Reverse the direction.
-        }
-        else 
+        if (effort < 0)
         {
             effort = -effort;
+            reverse = 1;      // Reverse the direction.
         }
         if (effort > maxEffort)
         {

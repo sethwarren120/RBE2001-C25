@@ -26,7 +26,7 @@ void Robot::RobotLoop(void)
 {
     if (buttonC.isPressed()) {
 
-        delay(3000);
+        delay(300);
 
         extender.out();
 

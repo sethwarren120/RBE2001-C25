@@ -2,6 +2,10 @@
 
 #include "chassis.h"
 
+#include "elevator.h"
+#include "extender.h"
+#include "gripper.h"
+
 class Robot
 {
 protected:

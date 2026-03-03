@@ -13,6 +13,18 @@
 float drivekP = 15;
 float turnkP = 25;
 
+float clampReal(float value, float min, float max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
+float invClamp(float value, float min, float max) {
+    if (value > min && value < max) {
+        return (value - min > max - value) ? max : min;
+    }
+    return value;
+}
 
 void Robot::DriveToPoint(const Pose& dest)
 {
@@ -76,19 +88,6 @@ void Robot::UpdatePose(const Twist& twist)
     TeleplotPrintXY("pose", currPose.x, currPose.y);
 #endif
 
-}
-
-float clampReal(float value, float min, float max) {
-    if (value < min) return min;
-    if (value > max) return max;
-    return value;
-}
-
-float invClamp(float value, float min, float max) {
-    if (value > min && value < max) {
-        return (value - min > max - value) ? max : min;
-    }
-    return value;
 }
 
 void Robot::HandleDestination(void)

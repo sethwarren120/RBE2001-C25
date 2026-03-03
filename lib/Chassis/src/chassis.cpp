@@ -2,8 +2,8 @@
 #include "Romi32U4MotorTemplate.h"
 
 // LEFT AND RIGHT MOTOR HAVE BEEN REVERSED
-Romi32U4EncodedMotor<LEFT_XOR, LEFT_B, PWM_L, DIR_L, OCR_L> rightMotor("L");
-Romi32U4EncodedMotor<RIGHT_XOR, RIGHT_B, PWM_R, DIR_R, OCR_R> leftMotor("R");
+Romi32U4EncodedMotor<LEFT_XOR, LEFT_B, PWM_L, DIR_L, OCR_L> leftMotor("L");
+Romi32U4EncodedMotor<RIGHT_XOR, RIGHT_B, PWM_R, DIR_R, OCR_R> rightMotor("R");
 
 /**
  * Because it's declared static, we initialize Chassis::loopFlag here.
@@ -133,8 +133,8 @@ void Chassis::InitializeMotors(void)
 
 void Chassis::SetMotorEfforts(int16_t left, int16_t right) 
 {
-    leftMotor.SetMotorEffortDirect(left); 
-    rightMotor.SetMotorEffortDirect(right);
+    leftMotor.SetMotorEffortDirect(-right); 
+    rightMotor.SetMotorEffortDirect(-left);
 }
 
 
@@ -148,8 +148,8 @@ Twist Chassis::CalcOdomFromWheelMotion(void)
      * In that case, you should return a Pose instead of a Twist.
      */
 
-      float leftSpeed = leftMotor.speed;
-     float rightSpeed = rightMotor.speed;
+      float leftSpeed = -rightMotor.speed;
+     float rightSpeed = -leftMotor.speed;
 
      /* 
      12.0 counts per revolution
