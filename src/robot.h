@@ -12,6 +12,10 @@ protected:
     enum ROBOT_STATE 
     {
         ROBOT_IDLE,
+        ROBOT_LIFT,
+        ROBOT_GRAB,
+        ROBOT_RELEASE,
+        ROBOT_LOWER,
         ROBOT_DRIVE_TO_POINT,
         ROBOT_TASK_WAIT,
         ROBOT_TASK

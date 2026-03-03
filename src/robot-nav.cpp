@@ -57,8 +57,8 @@ void Robot::SetDestination(const Pose& dest)
     robotState = ROBOT_DRIVE_TO_POINT;
 }
 
-float drivekP = 10;
-float turnkP = 10;
+float drivekP = 15;
+float turnkP = 25;
 
 void Robot::Spin(void) {
     if(robotState == ROBOT_DRIVE_TO_POINT) {
@@ -73,30 +73,36 @@ bool Robot::CheckSpin(void) {
     return fabs(destPose.theta - currPose.theta) < 0.05; // error tolerance of 0.2 radians
 }
 
+
 void Robot::DriveToPoint(void)
 {
     if(robotState == ROBOT_DRIVE_TO_POINT)
     {
-        float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2*PI);
-        errHead -= (errHead > PI) ? 2 * PI : 0;
-        
-        float errDist = sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) * cos(errHead);
-
-        TeleplotPrint("errDist", errDist);
-
-        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -60, 60), -20, 20) - invClamp(errHead * turnkP, -20, 20), -60, 60);
-        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -60, 60), -20, 20) + invClamp(errHead * turnkP, -20, 20), -60, 60);
-
-         TeleplotPrint("effortLeft", effortLeft);
-         TeleplotPrint("error head", errHead);
+        float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2 * PI);
 
 #ifdef __NAV_DEBUG__
-        // Print useful stuff here.
+        TeleplotPrint("unboundErrHead", errHead);
+#endif
+
+        errHead -= (errHead > PI) ? 2 * PI : 0;
+        errHead += (errHead < -PI) ? 2 * PI : 0;
+        // errHead = 0;
+        float errDist = sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2));
+
+        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -50, 50), -5, 5) - errHead * turnkP, -70, 70);
+        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -50, 50), -5, 5) + errHead * turnkP, -70, 70);
+
+
+#ifdef __NAV_DEBUG__
+        TeleplotPrint("errHead", errHead);
+        TeleplotPrint("errDist", errDist);
+        TeleplotPrint("effortLeft", effortLeft);
 #endif
 
         chassis.SetMotorEfforts(effortLeft, effortRight);
     }
 }
+
 
 bool Robot::CheckReachedDestination(void)
 {
