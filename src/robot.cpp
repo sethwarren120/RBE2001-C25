@@ -21,7 +21,7 @@ void Robot::InitializeRobot(void)
 
 Pose intermediate = Pose(15, -30, 0);
 
-Pose finish = Pose(40, 0, 0);
+Pose finish = Pose(55, 0, 0);
 
 void Robot::RobotLoop(void) 
 {
