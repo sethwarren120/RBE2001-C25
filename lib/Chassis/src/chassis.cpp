@@ -100,22 +100,23 @@ bool Chassis::ChassisLoop(Twist& velocity)
 {
     bool retVal = false;
 
-    if(loopFlag)
-    {
-        if(loopFlag > 1) Serial.println("Missed an update in Robot::RobotLoop()!");
+//     if(loopFlag)
+//     {
+//         if(loopFlag > 1) Serial.println("Missed an update in Robot::RobotLoop()!");
 
-#ifdef __LOOP_DEBUG__
-        Serial.print(millis());
-        Serial.print('\n');
-#endif
+// #ifdef __LOOP_DEBUG__
+//         Serial.print(millis());
+//         Serial.print('\n');
+// #endif
 
-        /* Update the wheel velocity so it gets back to Robot. */
-        velocity = CalcOdomFromWheelMotion();
+//         /* Update the wheel velocity so it gets back to Robot. */
 
-        loopFlag = 0;
+//         loopFlag = 0;
 
-        retVal = true;
-    }
+//         retVal = true;
+//     }
+
+    velocity = CalcOdomFromWheelMotion();
 
     return retVal;
 }
@@ -133,8 +134,8 @@ void Chassis::InitializeMotors(void)
 
 void Chassis::SetMotorEfforts(int16_t left, int16_t right) 
 {
-    leftMotor.SetMotorEffortDirect(-right); 
-    rightMotor.SetMotorEffortDirect(-left);
+    leftMotor.SetMotorEffortDirect(left); 
+    rightMotor.SetMotorEffortDirect(right);
 }
 
 
@@ -162,7 +163,7 @@ Twist Chassis::CalcOdomFromWheelMotion(void)
      rightSpeed = rightSpeed * conversion;
 
      velocity.u = (rightSpeed + leftSpeed) / 2;
-     velocity.omega = (rightSpeed - leftSpeed) / (ROBOT_RADIUS * 2);
+     velocity.omega = (leftSpeed - rightSpeed) / (ROBOT_RADIUS * 2);
 
 
 #ifdef __NAV_DEBUG__

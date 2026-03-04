@@ -9,10 +9,12 @@ void Gripper::setup() {
 
 void Gripper::grip() {
     servo.write(positionGrip);
-    delay(2000);
+    Serial.println("Gripping");
+    delay(1000);
 }
 
 void Gripper::release() {
     servo.write(positionRelease);
-    delay(2000);
+    Serial.println("Releasing");
+    delay(1000);
 }

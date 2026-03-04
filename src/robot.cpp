@@ -4,6 +4,7 @@
 #include"gripper.h"
 #include <Romi32U4Buttons.h>
 
+Romi32U4ButtonA buttonA;
 Romi32U4ButtonC buttonC;
 
 
@@ -18,25 +19,33 @@ void Robot::InitializeRobot(void)
     gripper.release();
 }
 
-Pose intermediate = Pose(10, -10, 0);
+Pose intermediate = Pose(15, -30, 0);
 
-Pose finish = Pose(20, 0, 0);
+Pose finish = Pose(40, 0, 0);
 
 void Robot::RobotLoop(void) 
 {
     if (buttonC.isPressed()) {
 
         delay(300);
+        
+        Serial.println("a");
 
         extender.out();
 
+        Serial.println("b");
+
         gripper.grip();
 
-        elevator.setHeight(Elevator::ElevatorPositions::CHASSISCLEARANCE);
+        Serial.println("c");
+
+        elevator.setHeight(Elevator::CHASSISCLEARANCE);
+
+        Serial.println("d");
 
         extender.in();
 
-        elevator.setHeight(Elevator::ElevatorPositions::LOWERSHELF);
+        elevator.setHeight(Elevator::LOWERSHELF);
 
         extender.out();
 
@@ -44,7 +53,7 @@ void Robot::RobotLoop(void)
 
         extender.in();
 
-        elevator.setHeight(Elevator::ElevatorPositions::UPPERSHELF);
+        elevator.setHeight(Elevator::UPPERSHELF);
 
         extender.out();
 
@@ -52,7 +61,7 @@ void Robot::RobotLoop(void)
 
         extender.in();
 
-        elevator.setHeight(Elevator::ElevatorPositions::TOP);
+        elevator.setHeight(Elevator::TOP);
 
         extender.out();
 
@@ -60,11 +69,17 @@ void Robot::RobotLoop(void)
 
         extender.in();
 
-        elevator.setHeight(Elevator::ElevatorPositions::CHASSISCLEARANCE);
+        elevator.setHeight(Elevator::CHASSISCLEARANCE);
 
         DriveToPoint(intermediate);
 
         DriveToPoint(finish);
+    }
+    if (buttonA.isPressed()) {
+
+        extender.out();
+        gripper.release();
+        elevator.setHeight(Elevator::GROUND);
     }
 }
 

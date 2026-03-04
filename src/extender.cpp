@@ -9,10 +9,12 @@ void Extender::setup() {
 
 void Extender::out() {
     servo.write(positionOut);
-    delay(2000);
+    Serial.println("Moving out");
+    delay(1000);
 }
 
 void Extender::in() {
     servo.write(positionIn);
-    delay(2000);
+    Serial.println("Moving in");
+    delay(1000);
 }

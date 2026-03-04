@@ -1,20 +1,22 @@
 #include <Arduino.h>
 #include <BlueMotor.h>
 
+#include "utils.h"
+
 volatile long count = 0;
 long countLast = 0;
 unsigned time = 0;
   
-float ks = 0;
-float kg = 0;
-float kp = 5;
-float kd = 0; 
-long maxError = 1;
+float ks = 0.0f;
+float kg = 0.0f;
+float kp = 15.0f;
+float kd = 0.0f; 
+float maxError = 0.2f;
 
 bool prevEncA = false;
 
-const int ENCA = 6;
-const int ENCB = 5;
+const int ENCA = 0;
+const int ENCB = 1;
 
 BlueMotor::BlueMotor()
 {
@@ -27,10 +29,10 @@ void BlueMotor::setup()
     pinMode(AIN1, OUTPUT);
     pinMode(ENCA, INPUT);
     pinMode(ENCB, INPUT);
-    TCCR1A = 0xA8; //0b10101000; //gcl: added OCR1C for adding a third PWM on pin 11
-    TCCR1B = 0x11; //0b00010001;
-    ICR1 = 400;
-    OCR1C = 0;
+    // TCCR1A = 0xAA; //0b10101000; //gcl: added OCR1C for adding a third PWM on pin 11
+    // TCCR1B = 0x11; //0b00010001;
+    // ICR1 = 400;
+    // OCR1C = 0;
 
     attachInterrupt(digitalPinToInterrupt(ENCA), isr, CHANGE);
     reset();
@@ -89,6 +91,7 @@ void BlueMotor::setEffort(int effort)
 
 void BlueMotor::setEffort(int effort, bool clockwise)
 {
+    TeleplotPrint("effort", effort);
     if (clockwise)
     {
         digitalWrite(AIN1, HIGH);
@@ -101,13 +104,20 @@ void BlueMotor::setEffort(int effort, bool clockwise)
     }
     // True range is 0 to 400, set to 200 for safety
     // CAN CHANGE THIS IF NEEDED
-    OCR1C = constrain(effort, 0, 200);
+    OCR1C = (effort == 0) ? 0 : 300;
+    // OCR1C = constrain(effort, 0, 400);
 }
 
 void BlueMotor::moveTo(float target)  
-{                     
+{                 
+    Serial.print("Moving to ");
+    Serial.println(target);
+
+    getYourMoveOn(target - countsToCm(getPosition()));
+
     while(abs(target - countsToCm(getPosition())) > maxError) {
         float position = countsToCm(getPosition());
+        TeleplotPrint("position", position);
         float error = target - position;
         float velocity = position - countLast * 50.0f; // Cm/s
 
@@ -123,4 +133,9 @@ void BlueMotor::moveTo(float target)
     }
 
     setEffort(0);
+}
+
+void BlueMotor::getYourMoveOn(float direction) {
+    setEffort(400 * (direction / abs(direction)));
+    delay(100);
 }

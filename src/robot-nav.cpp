@@ -3,6 +3,7 @@
  */
 
 #include "robot.h"
+#include "utils.h"
 
 
 
@@ -10,8 +11,8 @@
  * Sets a destination in the lab frame.
  */
 
-float drivekP = 15;
-float turnkP = 25;
+float drivekP = 30;
+float turnkP = 250;
 
 float clampReal(float value, float min, float max) {
     if (value < min) return min;
@@ -28,8 +29,14 @@ float invClamp(float value, float min, float max) {
 
 void Robot::DriveToPoint(const Pose& dest)
 {
+    destPose = dest;
+
     while(!CheckReachedDestination())
     {
+        Twist velocity;
+        chassis.ChassisLoop(velocity);        
+        UpdatePose(velocity);
+
         float errHead = fmod(atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta, 2 * PI);
 
         #ifdef __NAV_DEBUG__
@@ -39,10 +46,11 @@ void Robot::DriveToPoint(const Pose& dest)
         errHead -= (errHead > PI) ? 2 * PI : 0;
         errHead += (errHead < -PI) ? 2 * PI : 0;
         // errHead = 0;
+        
         float errDist = sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2));
 
-        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -50, 50), -5, 5) - errHead * turnkP, -70, 70);
-        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -50, 50), -5, 5) + errHead * turnkP, -70, 70);
+        float effortLeft = clampReal(invClamp(clampReal(errDist * drivekP, -80, 80), -5, 5) - errHead * turnkP, -90, 90);
+        float effortRight = clampReal(invClamp(clampReal(errDist * drivekP, -80, 80), -5, 5) + errHead * turnkP, -90, 90);
 
 
         #ifdef __NAV_DEBUG__
@@ -61,10 +69,8 @@ void Robot::DriveToPoint(const Pose& dest)
 
 bool Robot::CheckReachedDestination(void)
 {
-    Twist velocity;
-    chassis.ChassisLoop(velocity);
-    UpdatePose(velocity);
     return sqrt(pow(destPose.x - currPose.x, 2) + pow(destPose.y - currPose.y, 2)) < 2.0; // error tolerance of 2 cm
+    
 }
 
 void Robot::UpdatePose(const Twist& twist)
@@ -82,10 +88,14 @@ void Robot::UpdatePose(const Twist& twist)
     currPose.theta = newTheta;
 
 #ifdef __NAV_DEBUG__
-    TeleplotPrint("x", currPose.x);
-    TeleplotPrint("y", currPose.y);
-    TeleplotPrint("theta", currPose.theta);
-    TeleplotPrintXY("pose", currPose.x, currPose.y);
+    Serial.print(">currPose: ");
+    Serial.print(currPose.x);
+    Serial.print(":");
+    Serial.print(currPose.y);
+    Serial.print("|xy\n");
+    TeleplotPrint("currPose.x", currPose.x);
+    TeleplotPrint("currPose.y", currPose.y);
+    TeleplotPrint("currPose.theta", currPose.theta);
 #endif
 
 }

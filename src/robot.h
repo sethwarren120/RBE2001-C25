@@ -42,6 +42,23 @@ protected:
      */
     Pose currPose;
     Pose destPose;
+
+    /* ------------------- Control tuning for driving to pose ------------------- */
+    const float TURN_ONLY_THRESHOLD = 0.f;
+
+    const float KP_DIST = 1; // TODO: tune to work better
+    // const float KP_DIST = 2; // a previous value that kinda worked
+    const float KI_DIST = 0.05;
+
+    const float KP_THETA = 100;
+    const float KI_THETA = 0.0; // TODO: tune to work better
+    // const float KI_THETA = 0.2; // a previous value that kinda didn't work
+
+    const int16_t MAX_EFFORT = 400;
+
+    /* ----------------------------- PID integrators ---------------------------- */
+    float errorDistIntegral = 0;
+    float errorThetaIntegral = 0;
     
 public:
     Robot(void) {keyString.reserve(10);}

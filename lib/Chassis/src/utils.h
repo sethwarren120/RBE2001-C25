@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 void TeleplotPrint(const char* var, float value);
+float wrapToPi(float value);
 
 
 /**
